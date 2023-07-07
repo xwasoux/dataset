@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "workspace"
+version = "0.1.0"
+description = ""
+authors = ["wasou <oxwasouxo@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.9.5"
+ipykernel = "^6.22.0"
+
+torch = "^2.0.0"
+transformers = "^4.28.0"
+sentence-transformers = "^2.2.2"
+sentencepiece = "^0.1.98"
+scikit-learn = "^1.2.2"
+umap-learn = "^0.5.3"
+tensorboardx = "^2.6"
+
+datasets = "^2.11.0"
+fugashi = "^1.2.1"
+ipadic = "^1.0.0"
+rouge-score = "^0.1.2"
+sacrebleu = "^2.3.1"
+polyglot = "^16.7.4"
+
+numba = "^0.56.4"
+numpy = "^1.23.4"
+pandas = "^2.0.0"
+scipy = "^1.10.1"
+plotly = "^5.14.1"
+matplotlib = "^3.7.1"
+
+tree-sitter = "^0.20.1"
+pylatexenc = "^2.10"
+
+filelock = "^3.11.0"
+gdown = "^4.7.1"
+more-itertools = "^9.1.0"
+nbformat = "^5.8.0"
+hdbscan = "^0.8.29"
+anytree = "^2.9.0"
+python-levenshtein = "^0.21.1"
+gitpython = "^3.1.31"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
