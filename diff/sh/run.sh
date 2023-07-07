@@ -1,7 +1,7 @@
 github_link=##repository
 
 cd ..
-mkdir diff workbench
+mkdir diff-commit workbench
 python3 datacollation.py \
     --repo_link $github_link \
     --output_dir diff/##name
