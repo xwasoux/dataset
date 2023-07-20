@@ -162,3 +162,9 @@ cython_debug/
 ## user option 
 ## dir
 workbench/
+clone/
+
+## extension
+*.json
+*.jsonl
+*.csv
