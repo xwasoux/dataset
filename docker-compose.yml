@@ -1,0 +1,25 @@
+version: '3'
+services:
+
+  dataset:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # User setting
+        - USERNAME=${USER_NAME}
+        - USER_UID=${USER_UID}
+        - USER_GID=${USER_GID}
+
+    volumes:
+      - .:/app
+
+    # Uncomment the next four lines if you will use a ptrace-based debugger like C++, Go, and Rust.
+    # cap_add:
+    #   - SYS_PTRACE
+    # security_opt:
+    #   - seccomp:unconfined
+
+    tty: true
+    stdin_open: true
+    working_dir: /app

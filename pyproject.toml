@@ -42,6 +42,7 @@ hdbscan = "^0.8.29"
 anytree = "^2.9.0"
 python-levenshtein = "^0.21.1"
 gitpython = "^3.1.31"
+graphviz = "^0.20.1"
 
 
 [build-system]
