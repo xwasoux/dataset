@@ -168,3 +168,10 @@ clone/
 *.json
 *.jsonl
 *.csv
+*.tsv
+*.png
+*.jpg
+*.jpeg
+*.dot
+*.pickle
+*.zip
