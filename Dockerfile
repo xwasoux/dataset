@@ -3,6 +3,8 @@ FROM python:3.11
 RUN apt-get -y update && apt-get -y upgrade
 RUN apt-get -y install \
 		build-essential \
+		iputils-ping \
+		net-tools \
 		python3-pip \
 		python3-wheel \
 		vim \
