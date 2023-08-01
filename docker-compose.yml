@@ -11,6 +11,12 @@ services:
         - USER_UID=${USER_UID}
         - USER_GID=${USER_GID}
 
+        # Proxy setting
+        - HTTP_PROXY=${HTTP_PROXY}
+        - HTTPS_PROXY=${HTTPS_PROXY}
+        - http_proxy=${HTTP_PROXY}
+        - https_proxy=${HTTPS_PROXY}
+
     volumes:
       - .:/app
 
