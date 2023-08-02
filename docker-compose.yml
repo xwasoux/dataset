@@ -7,15 +7,22 @@ services:
       dockerfile: Dockerfile
       args:
         # User setting
-        - USERNAME=${USER_NAME}
-        - USER_UID=${USER_UID}
-        - USER_GID=${USER_GID}
+        - USERNAME=$USER_NAME
+        - USER_UID=$USER_UID
+        - USER_GID=$USER_GID
 
         # Proxy setting
-        - HTTP_PROXY=${HTTP_PROXY}
-        - HTTPS_PROXY=${HTTPS_PROXY}
-        - http_proxy=${HTTP_PROXY}
-        - https_proxy=${HTTPS_PROXY}
+        - HTTP_PROXY=$HTTP_PROXY
+        - HTTPS_PROXY=$HTTP_PROXY
+        - http_proxy=$HTTP_PROXY
+        - https_proxy=$HTTP_PROXY
+
+    environment:
+      # Proxy setting
+      - HTTP_PROXY=$HTTP_PROXY
+      - HTTPS_PROXY=$HTTP_PROXY
+      - http_proxy=$HTTP_PROXY
+      - https_proxy=$HTTP_PROXY
 
     volumes:
       - .:/app
