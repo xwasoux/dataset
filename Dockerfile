@@ -5,8 +5,10 @@ RUN apt-get -y install \
 		build-essential \
 		iputils-ping \
 		net-tools \
+		htop \
 		python3-pip \
 		python3-wheel \
+		zip \
 		vim \
 		git \
 		tig \
