@@ -2,7 +2,7 @@ CURRENT=$(pwd)
 dataset_name=SubtreeEmelemt
 
 mkdir ../data ../data/workbench ../data/workbench/Extracted
-mkdir ../data/$dataset_name
+mkdir ../output/$dataset_name
 cd ../data/workbench
 gdown 1rd2Tc6oUWBo7JouwexW3ksQ0PaOhUr6h
 unzip Cleaned_CodeSearchNet.zip
