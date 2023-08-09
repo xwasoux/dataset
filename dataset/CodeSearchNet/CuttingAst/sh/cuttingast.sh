@@ -1,9 +1,9 @@
 lang=python
 source_base_dir=../data/workbench/Extracted
-target_base_dir=../data/CuttingAst
+target_base_dir=../output/CuttingAst
 pretrained_model=microsoft/codebert-base
 
-python3 ../src/cuttingast.py \
+python3 ../cuttingast.py \
     --lang $lang \
     --source_base_dir $source_base_dir \
     --target_base_dir $target_base_dir \
