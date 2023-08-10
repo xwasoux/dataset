@@ -4,7 +4,9 @@ mkdir $dir_name
 dir_path=$(pwd)
 
 cd $dir_name
-mkdir data data/workbench output sh
+mkdir data data/workbench data/Extracted
+mkdir output output/$dir_name 
+mkdir sh
 
 touch preprocess.py main.py
 
