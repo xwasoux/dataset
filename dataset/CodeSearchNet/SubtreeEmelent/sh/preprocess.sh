@@ -1,5 +1,5 @@
 CURRENT=$(pwd)
-dataset_name=SubtreeEmelemt
+dataset_name=SubtreeEmelent
 
 mkdir ../data ../data/workbench ../data/workbench/Extracted
 mkdir ../output/$dataset_name
