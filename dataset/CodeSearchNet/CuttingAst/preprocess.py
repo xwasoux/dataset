@@ -59,8 +59,8 @@ def main() -> None:
         os.makedirs(path.join(args.target_base_dir, lang), exist_ok=True)
         
         for jsonl_path in jsonl_path_list:
-            purpose = jsonl_path.split("/")[-1].split(".")[0]
-            logging.info(f"Purpose : {purpose}")
+            partition = jsonl_path.split("/")[-1].split(".")[0]
+            logging.info(f"Partition : {partition}")
             
 
             with open(f"{jsonl_path}") as f:
@@ -68,14 +68,14 @@ def main() -> None:
             
             extracted_jsonl = []
             for line in tqdm(jsonl):
-                code = remove_comments(line["original_string"])
-                code_tokens = tokenizer.tokenize(code)
+                cleaned_code = remove_comments(line["original_string"])
+                code_tokens = tokenizer.tokenize(cleaned_code)
 
                 if len(code_tokens) <= 510:
                     extracted_jsonl.append(line)
             logging.info(f"New jsonl : {len(extracted_jsonl)}")
 
-            stored_file_path = path.join(args.target_base_dir, lang, f"{purpose}.jsonl")
+            stored_file_path = path.join(args.target_base_dir, lang, f"{partition}.jsonl")
             df = pd.DataFrame(extracted_jsonl)
             df.to_json(stored_file_path, force_ascii=False, lines=True, orient="records")
 
