@@ -29,12 +29,6 @@ def remove_comments(code) -> str:
     code = re.sub(r'\#.*', '', code)                   ##comments
     return code
 
-def mk_dir(path_str:str) -> None:
-    try:
-        os.mkdir(path_str)
-    except:
-        pass
-    return None
     
 
 def main() -> None:
@@ -62,7 +56,7 @@ def main() -> None:
         jsonl_path_list = get_jsonl_path_list(path.join(args.source_base_dir, lang))
         logging.info(jsonl_path_list)
 
-        mk_dir(path.join(args.target_base_dir, lang))
+        os.makedirs(path.join(args.target_base_dir, lang), exist_ok=True)
         
         for jsonl_path in jsonl_path_list:
             purpose = jsonl_path.split("/")[-1].split(".")[0]
