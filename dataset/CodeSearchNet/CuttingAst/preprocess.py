@@ -15,6 +15,8 @@ from copy import deepcopy
 from astars import AParser, AstAnalyser, AstOperator, ACodeGenerator
 from transformers import AutoTokenizer
 
+from utils import remove_comments_and_docstrings
+
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
@@ -22,14 +24,8 @@ logging.basicConfig(format='%(asctime)s -\n %(message)s',
 def get_jsonl_path_list(base_dir:str) -> list:
     condition = f'{base_dir}/*.jsonl'
     return glob(condition, recursive=True)
-
-def remove_comments(code) -> str:
-    code = re.sub(r'\"\"\"(.|\n)*?\"\"\"', '', code)   # """comments"""
-    code = re.sub(r"\'\'\'(.|\n)*?\'\'\'", '', code)   # '''comments'''
-    code = re.sub(r'\#.*', '', code)                   ##comments
-    return code
-
     
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -68,7 +64,7 @@ def main() -> None:
             
             extracted_jsonl = []
             for line in tqdm(jsonl):
-                cleaned_code = remove_comments(line["original_string"])
+                cleaned_code = remove_comments_and_docstrings(source=line["original_string"], lang=lang)
                 code_tokens = tokenizer.tokenize(cleaned_code)
 
                 if len(code_tokens) <= 510:
