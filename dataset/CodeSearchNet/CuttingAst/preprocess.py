@@ -1,18 +1,14 @@
 #!/usr/bin/env python
 
-import re
 import os
 import json
 import logging
 import argparse
-import Levenshtein
 import pandas as pd
 from os import path
 from glob import glob
 from tqdm import tqdm
-from copy import deepcopy
 
-from astars import AParser, AstAnalyser, AstOperator, ACodeGenerator
 from transformers import AutoTokenizer
 
 from utils import remove_comments_and_docstrings
