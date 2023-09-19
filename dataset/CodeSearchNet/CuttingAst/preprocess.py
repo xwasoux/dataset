@@ -20,7 +20,6 @@ logging.basicConfig(format='%(asctime)s -\n %(message)s',
 def get_jsonl_path_list(base_dir:str) -> list:
     condition = f'{base_dir}/*.jsonl'
     return glob(condition, recursive=True)
-    
 
 
 def main() -> None:
@@ -54,7 +53,6 @@ def main() -> None:
             partition = jsonl_path.split("/")[-1].split(".")[0]
             logging.info(f"Partition : {partition}")
             
-
             with open(f"{jsonl_path}") as f:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
@@ -75,10 +73,12 @@ def main() -> None:
 
                 if len(code_subtokens) <= 510:
                     extracted_jsonl.append(line)
+
             logging.info(f"New jsonl : {len(extracted_jsonl)}")
 
-            stored_file_path = path.join(args.target_base_dir, lang, f"{partition}")
             df = pd.DataFrame(extracted_jsonl)
+
+            stored_file_path = path.join(args.target_base_dir, lang, f"{partition}")
             df.to_json(f"{stored_file_path}.jsonl", force_ascii=False, lines=True, orient="records")
             df.to_csv(f"{stored_file_path}.csv")
 
