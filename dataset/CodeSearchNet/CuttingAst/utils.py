@@ -60,3 +60,12 @@ def remove_comments_and_docstrings(source:str, lang:str) -> str:
             if x.strip()!="":
                 temp.append(x)
         return '\n'.join(temp)
+
+def remove_spaces_and_tabs(source:str) -> str:
+    source = re.sub(r" +", " ", source)
+    source = re.sub(r"\t+", "\t", source)
+    return source
+
+def flatten_code(source:str) -> str:
+    source = re.sub(r"\n", " ", source)
+    return source

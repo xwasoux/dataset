@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from transformers import AutoTokenizer
 
-from utils import remove_comments_and_docstrings
+from utils import remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code
 
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -61,7 +61,13 @@ def main() -> None:
             extracted_jsonl = []
             for line in tqdm(jsonl):
                 cleaned_code = remove_comments_and_docstrings(source=line["original_string"], lang=lang)
+                line["cleaned_code"] = cleaned_code
                 code_tokens = tokenizer.tokenize(cleaned_code)
+                line["code_subtokens"] = code_tokens
+
+                code_noindent = remove_spaces_and_tabs(cleaned_code)
+                line["code_noindent"] = code_noindent
+                line["flatten_code"] = flatten_code(code_noindent)
 
                 if len(code_tokens) <= 510:
                     extracted_jsonl.append(line)
