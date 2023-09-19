@@ -11,7 +11,7 @@ from glob import glob
 from tqdm import tqdm
 from copy import deepcopy
 
-from astars import ANode, AParser, AstAnalyser, AstOperator, ACodeGenerator, AIDTraverser, ASearcher
+from astars import AParser,AParseTree, ATraverser, APruner
 from transformers import AutoTokenizer
 
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
@@ -39,20 +39,20 @@ class OrderList:
     def __init__(self) -> None:
         pass
     
-    def front_seq(self, args:argparse, tree:ANode) -> list:
-        res = AstAnalyser.forwardSequencial_codeDelete(tree=tree)
+    def front_seq(self, args:argparse, tree:AParseTree) -> "APruner":
+        res = APruner.seqForwardPrune(tree=tree)
         return res
 
-    def back_seq(self, args:argparse, tree:ANode) -> list:
-        res = AstAnalyser.backwardSequencial_codeDelete(tree=tree)
+    def back_seq(self, args:argparse, tree:AParseTree) -> "APruner":
+        res = APruner.seqBackwardPrune(tree=tree)
         return res
 
-    def rule_point(self, args:argparse, tree:ANode) -> list:
-        res = AstAnalyser.selectedPointing_codeDelete(tree=tree, types=args.target_subtree_root)
+    def rule_point(self, args:argparse, tree:AParseTree, selections:list) -> "APruner":
+        res = APruner.selectedPointingPrune(tree=tree, selections=selections)
         return res
 
-    def all_point(self, args:argparse, tree:ANode) -> list:
-        res = AstAnalyser.pointingCodeDelete(tree=tree)
+    def all_point(self, args:argparse, tree:AParseTree) -> "APruner":
+        res = APruner.seqPointingPrune(tree=tree)
         return res
 
 def create_delete_dict(base_dict:dict, traverse_res:list, base_path:str, lang:str, partition:str, deletion_type:str) -> None:
