@@ -7,89 +7,121 @@ import logging
 import argparse
 import Levenshtein
 import pandas as pd
-from os import path
 from glob import glob
 from tqdm import tqdm
 from copy import deepcopy
 
-from astars import ANode, AParser, AstAnalyser, AstOperator, ACodeGenerator
+from astars import ANode, AParser, AstAnalyser, AstOperator, ACodeGenerator, AIDTraverser, ASearcher
 from transformers import AutoTokenizer
 
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
-def getJsonlPaths(pathName:str) -> list:
-    condition = f'{pathName}/*.jsonl'
+def get_jsonl_paths(base_dir:str) -> list:
+    condition = f'{base_dir}/*.jsonl'
     return glob(condition, recursive=True)
 
 
-def removeComments(code) -> str:
+def remove_comments(code) -> str:
     code = re.sub(r'\"\"\"(.|\n)*?\"\"\"', '', code)   # """comments"""
     code = re.sub(r"\'\'\'(.|\n)*?\'\'\'", '', code)   # '''comments'''
     code = re.sub(r'\#.*', '', code)                   ##comments
     return code
 
-def mkDir(pathStr:str) -> None:
-    try:
-        os.mkdir(pathStr)
-    except:
-        pass
-    return None
-
 def dist2cosSim(distance:int) -> float:
     return 1/(1+distance)
 
-def treeSize(root) -> int:
+def tree_size(root) -> int:
     return len(root.descendants)+1
     
 class OrderList:
     def __init__(self) -> None:
         pass
     
-    def front_seq(self, tree:ANode) -> list:
-        res = AstAnalyser.forwardSequencialCodeDelete(tree=tree)
+    def front_seq(self, args:argparse, tree:ANode) -> list:
+        res = AstAnalyser.forwardSequencial_codeDelete(tree=tree)
         return res
 
-    def back_seq(self, tree:ANode) -> list:
-        res = AstAnalyser.backwardSequencialCodeDelete(tree=tree)
+    def back_seq(self, args:argparse, tree:ANode) -> list:
+        res = AstAnalyser.backwardSequencial_codeDelete(tree=tree)
         return res
 
-    def rule_point(self, tree:ANode) -> list:
-        units = ["if_statement", "elif_clause", "else_clause", 
-                 "for_statement", "while_statement", "expression_statement", 
-                 "return_statement", "break_statement", "with_statement"]
-        res = AstAnalyser.selectedPointingCodeDelete(tree=tree, types=units)
+    def rule_point(self, args:argparse, tree:ANode) -> list:
+        res = AstAnalyser.selectedPointing_codeDelete(tree=tree, types=args.target_subtree_root)
         return res
 
-    def random_point(self, tree:ANode) -> list:
-        return 
+    def all_point(self, args:argparse, tree:ANode) -> list:
+        res = AstAnalyser.pointingCodeDelete(tree=tree)
+        return res
 
-def createDeleteInfo(baseDict:dict, traversalRes:list, baseDir:str, lang:str, purpose:str, deletionType:str) -> None:
+def create_delete_dict(base_dict:dict, traverse_res:list, base_path:str, lang:str, partition:str, deletion_type:str) -> None:
     generator = ACodeGenerator()
 
-    storeJsonl = []
-    for target in traversalRes:
-        recoverCode = generator.generate(root=target)
+    stored_jsonl = []
+    for target in traverse_res:
+        recover_code = generator.generate(root=target)
 
-        mainDict = deepcopy(baseDict)
+        main_dict = deepcopy(base_dict)
 
-        mainDict["editedCode"] = recoverCode
-        mainDict["editedSizeChar"] = len(recoverCode)
-        mainDict["editedSizeLine"] = len(recoverCode.split("\n"))
-        mainDict["editedSizeTree"] = treeSize(target)
+        main_dict["edited_code"] = recover_code
+        main_dict["edited_size_char"] = len(recover_code)
+        main_dict["edited_size_line"] = len(recover_code.split("\n"))
+        main_dict["edited_size_tree"] = tree_size(target)
 
-        mainDict["levelDistChar"] = Levenshtein.distance(mainDict["originalCode"], recoverCode)
-        mainDict["levelDistLine"] = Levenshtein.distance(mainDict["originalCode"].split("\n"), recoverCode.split("\n"))
-        mainDict["diffNodeSize"]  = mainDict["originalSizeTree"] - mainDict["editedSizeTree"]
+        main_dict["leven_distance_char"] = Levenshtein.distance(main_dict["original_code"], recover_code)
+        main_dict["leven_distance_line"] = Levenshtein.distance(main_dict["original_code"].split("\n"), recover_code.split("\n"))
+        main_dict["diff_node_size"]  = main_dict["original_size_tree"] - main_dict["edited_size_tree"]
 
-        storeJsonl.append(mainDict)
+        stored_jsonl.append(main_dict)
 
-    corename = baseDict["path"].split("/")[-1].split(".")[0]
-    storeFilename = path.join(baseDir, lang, purpose, deletionType, f"{deletionType}_{corename}.jsonl")
+    corename = base_dict["path"].split("/")[-1].split(".")[0]
+    stored_filename = os.path.join(base_path, lang, partition, deletion_type, f"{deletion_type}_{corename}.jsonl")
 
-    df = pd.DataFrame(storeJsonl)
-    df.to_json(storeFilename, orient="records", force_ascii=False, lines=True)
+    df = pd.DataFrame(stored_jsonl)
+    df.to_json(stored_filename, orient="records", force_ascii=False, lines=True)
+
+    return None
+
+def point_delete_dict(args:argparse, base_dict:dict, edit_res:list, base_path:str, lang:str, partition:str, deletion_type:str) -> None:
+    generator = ACodeGenerator()
+
+    stored_jsonl = []
+    for target in tqdm(edit_res):
+        edited_tree = target[0]
+        target_node = target[1]
+        target_node_name = target_node.type
+        recover_code = generator.generate(root=edited_tree)
+
+        main_dict = deepcopy(base_dict)
+
+        main_dict["edited_code"] = recover_code
+        main_dict["edited_size_char"] = len(recover_code)
+        main_dict["edited_size_line"] = len(recover_code.split("\n"))
+        main_dict["edited_size_tree"] = tree_size(edited_tree)
+
+        main_dict["leven_distance_char"] = Levenshtein.distance(main_dict["original_code"], recover_code)
+        main_dict["leven_distance_line"] = Levenshtein.distance(main_dict["original_code"].split("\n"), recover_code.split("\n"))
+        main_dict["diff_node_size"]  = main_dict["original_size_tree"] - main_dict["edited_size_tree"]
+
+        main_dict["delete_target_node"] = target_node_name
+
+        all_node_ids = AIDTraverser.leftPostOrder(edited_tree)
+        all_node_name = []
+        for node_id in all_node_ids:
+            dup_tree = deepcopy(edited_tree)
+            target_node = ASearcher.searchNode(dup_tree, str(node_id))
+            all_node_name.append(target_node.type)
+
+        main_dict["edited_ast_node_types"] = list(set(all_node_name))
+
+        stored_jsonl.append(main_dict)
+
+    corename = base_dict["path"].split("/")[-1].split(".")[0]
+    stored_filename = os.path.join(base_path, lang, partition, deletion_type, f"{deletion_type}_{corename}.jsonl")
+
+    df = pd.DataFrame(stored_jsonl)
+    df.to_json(stored_filename, orient="records", force_ascii=False, lines=True)
 
     return None
 
@@ -99,6 +131,7 @@ def main() -> None:
 
     parser.add_argument("--lang", type=str)
     parser.add_argument("--all_lang", action="store_true")
+    parser.add_argument("--target_subtree_root", nargs="*")
 
     parser.add_argument("--source_base_dir", type=str)
     parser.add_argument("--target_base_dir", type=str)
@@ -107,8 +140,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # anyDataTypes = ["front_seq", "back_seq", "rule_point", "random_point"]
-    anyDataTypes = ["front_seq", "back_seq", "rule_point"]
+    deletion_types = ["front_seq", "back_seq", "rule_point", "all_point"]
 
     if args.all_lang:
         languages = ["go", "java", "javascript", "php", "python", "ruby"]
@@ -117,45 +149,59 @@ def main() -> None:
 
     for lang in languages:
         logging.info(f"=== {lang} ===")
-        jsonlPaths = getJsonlPaths(path.join(args.source_base_dir, lang))
+        retrive_jsonl_paths = get_jsonl_paths(os.path.join(args.source_base_dir, lang))
 
-        mkDir(path.join(args.target_base_dir, lang))
+        os.makedirs(os.path.join(args.target_base_dir, lang), exist_ok=True)
         
-        for splitDataPath in jsonlPaths:
-            purpose = splitDataPath.split("/")[-1].split(".")[0]
-            logging.info(f"== {purpose} ==")
+        for jsonl_path in retrive_jsonl_paths:
+            partition = jsonl_path.split("/")[-1].split(".")[0]
+            logging.info(f"== {partition} ==")
             
-            mkDir(path.join(args.target_base_dir, lang, purpose))
+            os.makedirs(os.path.join(args.target_base_dir, lang, partition), exist_ok=True)
 
-            with open(f"{splitDataPath}") as f:
+            with open(f"{jsonl_path}") as f:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
-            for line in tqdm(jsonl):
-                baseDict = {}
+            UPPER_LIMIT = 100
+            for num, _ in enumerate(tqdm(range(UPPER_LIMIT))):
+                line = jsonl[num]
+                base_dict = {}
 
-                baseDict["repo"] = line["repo"]
-                baseDict["path"] = line["path"]
+                base_dict["repo"] = line["repo"]
+                base_dict["path"] = line["path"]
 
-                code = removeComments(line["original_string"])
+                code = remove_comments(line["original_string"])
                 
-                baseDict["originalCode"] = code
-                baseDict["originalSizeChar"] = len(code)
-                baseDict["originalSizeLine"] = len(code.split("\n"))
+                base_dict["original_code"] = code
+                base_dict["original_size_char"] = len(code)
+                base_dict["original_size_line"] = len(code.split("\n"))
 
                 parser = AParser()
                 tree = parser.parse(text=code, lang=lang)
 
-                baseDict["originalSizeTree"] = treeSize(tree)
+                base_dict["original_size_tree"] = tree_size(tree)
 
+                ################################
+                ## for all node point deletion 
+                ################################
+                all_node_ids = AIDTraverser.leftPostOrder(tree)
 
-                for eachType in anyDataTypes:
-                    # logging.info(f"= {eachType} =")
-                    orderList = OrderList()
-                    getDeletionList = getattr(orderList, eachType)
-                    orderTraversalRes = getDeletionList(tree)
+                edit_res = []
+                all_node_name = []
+                for node_id in all_node_ids:
+                    dup_tree = deepcopy(tree)
+                    target_node = ASearcher.searchNode(dup_tree, str(node_id))
+                    all_node_name.append(target_node.type)
 
-                    mkDir(path.join(args.target_base_dir, lang, purpose, eachType))
-                    createDeleteInfo(baseDict, orderTraversalRes, args.target_base_dir, lang, purpose, eachType)
+                    if not target_node.is_root:
+                        edited_tree = AstOperator.delete(root=dup_tree, target=target_node)
+                        edit_res.append((edited_tree, target_node))
+                
+                base_dict["original_ast_node_types"] = list(set(all_node_name))
+                
+                os.makedirs(os.path.join(args.target_base_dir, lang, partition, "all_point"), exist_ok=True)
+                point_delete_dict(args, base_dict, edit_res, args.target_base_dir, lang, partition, "all_point")
+
 
     return None
 
