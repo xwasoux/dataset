@@ -67,7 +67,11 @@ def main() -> None:
 
                 code_noindent = remove_spaces_and_tabs(cleaned_code)
                 line["code_noindent"] = code_noindent
-                line["flatten_code"] = flatten_code(code_noindent)
+                line["code_noindent_subtokens"] = tokenizer.tokenize(code_noindent)
+
+                flattened_code = flatten_code(code_noindent)
+                line["flattened_code"] = flattened_code
+                line["flattened_code_subtokens"] = tokenizer.tokenize(flattened_code)
 
                 if len(code_subtokens) <= 510:
                     extracted_jsonl.append(line)
