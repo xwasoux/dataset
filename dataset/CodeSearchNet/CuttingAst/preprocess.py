@@ -58,7 +58,11 @@ def main() -> None:
             
             extracted_jsonl = []
             for line in tqdm(jsonl):
-                cleaned_code = remove_comments_and_docstrings(source=line["original_string"], lang=lang)
+                try:
+                    cleaned_code = remove_comments_and_docstrings(source=line["original_string"], lang=lang)
+                except:
+                    continue
+                
                 line["cleaned_code"] = cleaned_code
                 code_subtokens = tokenizer.tokenize(cleaned_code)
                 line["code_subtokens"] = code_subtokens
