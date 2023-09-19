@@ -73,9 +73,10 @@ def main() -> None:
                     extracted_jsonl.append(line)
             logging.info(f"New jsonl : {len(extracted_jsonl)}")
 
-            stored_file_path = path.join(args.target_base_dir, lang, f"{partition}.jsonl")
+            stored_file_path = path.join(args.target_base_dir, lang, f"{partition}")
             df = pd.DataFrame(extracted_jsonl)
-            df.to_json(stored_file_path, force_ascii=False, lines=True, orient="records")
+            df.to_json(f"{stored_file_path}.jsonl", force_ascii=False, lines=True, orient="records")
+            df.to_csv(f"{stored_file_path}.csv")
 
     return None
 
