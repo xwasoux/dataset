@@ -62,14 +62,14 @@ def main() -> None:
             for line in tqdm(jsonl):
                 cleaned_code = remove_comments_and_docstrings(source=line["original_string"], lang=lang)
                 line["cleaned_code"] = cleaned_code
-                code_tokens = tokenizer.tokenize(cleaned_code)
-                line["code_subtokens"] = code_tokens
+                code_subtokens = tokenizer.tokenize(cleaned_code)
+                line["code_subtokens"] = code_subtokens
 
                 code_noindent = remove_spaces_and_tabs(cleaned_code)
                 line["code_noindent"] = code_noindent
                 line["flatten_code"] = flatten_code(code_noindent)
 
-                if len(code_tokens) <= 510:
+                if len(code_subtokens) <= 510:
                     extracted_jsonl.append(line)
             logging.info(f"New jsonl : {len(extracted_jsonl)}")
 
