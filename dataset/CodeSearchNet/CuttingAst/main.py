@@ -48,7 +48,7 @@ def create_base_dict(original_dict:dict, tree:AParseTree) -> dict:
 def dist2cosSim(distance:int) -> float:
     return 1/(1+distance)
 
-class OrderList:
+class Pruner:
     def __init__(self) -> None:
         pass
     
@@ -148,8 +148,8 @@ def main() -> None:
 
                 for each_type in deletion_types:
                     logging.info(f"= {each_type} =")
-                    orderList = OrderList()
-                    get_pruned_res = getattr(orderList, each_type)
+                    pruner = Pruner()
+                    get_pruned_res = getattr(pruner, each_type)
                     stored_jsonl = get_pruned_res(args, tree, base_dict)
 
                     os.makedirs(os.path.join(args.target_base_dir, lang, partition, each_type), exist_ok=True)
