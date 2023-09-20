@@ -96,6 +96,30 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
 
     
 def main() -> None:
+    '''This code create Cutting-AST dataset.
+        
+        {
+            "repo": the repository name
+            "path": file path name in the repository
+            "func_name": the function name in the repository
+            "original_string": original function
+            "cleaned_code": removed comments and docstrings
+            "cleaned_code_size_char": number of character
+            "cleaned_code_size_line": number of line
+            "cleaned_code_size_tree": size of tree
+            "cleaned_code_ast_node_types": a list of node types
+            "edited_code": edited code using node pruning
+            "edited_code_size_char": number of character
+            "edited_code_size_line": number of line
+            "edited_code_size_tree": size of tree
+            "diff_size_char": levenshtein distance of character between cleaned_code & edited_code
+            "diff_size_line": levenshtein distance of line between cleaned_code & edited_code
+            "diff_size_node": difference of tree size between cleaned_code & edited_code
+            "edited_ast_node_types": a list of node types
+        }
+
+    '''
+    
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--lang", type=str)
