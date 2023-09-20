@@ -19,8 +19,8 @@ logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
-def get_jsonl_paths(pathName:str) -> list:
-    condition = f'{pathName}/*.jsonl'
+def get_jsonl_paths(base_dir:str) -> list:
+    condition = f'{base_dir}/*.jsonl'
     return glob(condition, recursive=True)
 
 
@@ -30,18 +30,14 @@ def remove_comments(code) -> str:
     code = re.sub(r'\#.*', '', code)                   ##comments
     return code
 
-def get_subtree_elements(code:str, lang:str) -> list:
-    units = ["if_statement", "elif_clause", "else_clause", 
-                "for_statement", "while_statement", "expression_statement", 
-                "return_statement", "break_statement", "with_statement"]
-
-    parser = AParser()
-    tree = parser.parse(code, lang)
+def get_subtree_elements(tree:ANode, target_units:list) -> list:
 
     traverse_res = ATypeTraverser.leftPreOrder(tree)
-    subtree_elem = [node for node in traverse_res if node in units]
+    subtree_elem = [node for node in traverse_res if node in target_units]
 
     return subtree_elem
+
+
 
     
 def main() -> None:
@@ -49,6 +45,7 @@ def main() -> None:
 
     parser.add_argument("--lang", type=str)
     parser.add_argument("--all_lang", action="store_true")
+    parser.add_argument("--target_subtree_root", nargs="*")
 
     parser.add_argument("--source_base_dir", type=str)
     parser.add_argument("--target_base_dir", type=str)
@@ -68,17 +65,21 @@ def main() -> None:
 
         os.makedirs(path.join(args.target_base_dir, lang), exist_ok=True)
         
-        for each_partition in jsonl_paths:
-            partition = each_partition.split("/")[-1].split(".")[0]
+        for each_partition_path in jsonl_paths:
+            partition = each_partition_path.split("/")[-1].split(".")[0]
             logging.info(f"== {partition} ==")
             
-            with open(f"{each_partition}") as f:
+            with open(f"{each_partition_path}") as f:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
             for line in tqdm(jsonl):
                 code = remove_comments(line["original_string"])
                 line["code_pure"] = code
-                line["subtree_elements"] = get_subtree_elements(code, lang)
+                
+                parser = AParser()
+                tree = parser.parse(code, lang)
+
+                line["subtree_elements"] = get_subtree_elements(tree, args.target_subtree_root)
                 line["subtree_elements_unique"] = list(dict.fromkeys(line["subtree_elements"]))
 
             df = pd.DataFrame(jsonl)
