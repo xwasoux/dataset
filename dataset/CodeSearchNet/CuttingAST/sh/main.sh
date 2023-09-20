@@ -10,3 +10,5 @@ python3 ../main.py \
     --target_base_dir $target_base_dir \
     --pretrained_model $pretrained_model \
     --upper_data_size 500
+
+zip $target_base_dir -r $target_base_dir
