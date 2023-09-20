@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import re
 import os
 import json
 import logging
@@ -12,7 +11,6 @@ from tqdm import tqdm
 from copy import deepcopy
 
 from astars import AParser,AParseTree, ATraverser, APruner
-from transformers import AutoTokenizer
 
 logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -147,7 +145,7 @@ def main() -> None:
                 base_dict = create_base_dict(original_dict=line, tree=tree)
 
                 for each_type in deletion_types:
-                    logging.info(f"= {each_type} =")
+                    # logging.info(f"= {each_type} =")
                     pruner = Pruner()
                     get_pruned_res = getattr(pruner, each_type)
                     stored_jsonl = get_pruned_res(args, tree, base_dict)
@@ -156,13 +154,11 @@ def main() -> None:
 
                     corename = base_dict["path"].split("/")[-1].split(".")[0]
                     stored_filename = os.path.join(args.target_base_dir, lang, partition, each_type, f"{each_type}_{corename}")
-                    logging.info(stored_filename)
 
                     df = pd.DataFrame(stored_jsonl)
                     df.to_json(f"{stored_filename}.jsonl", orient="records", force_ascii=False, lines=True)
                     df.to_csv(f"{stored_filename}.csv")
                 
-                return
     return None
 
 if __name__ == "__main__":
