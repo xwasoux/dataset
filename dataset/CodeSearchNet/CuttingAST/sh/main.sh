@@ -8,4 +8,5 @@ python3 ../main.py \
     --target_subtree_root if_statement elif_clause else_clause for_statement while_statement expression_statement return_statement break_statement with_statement \
     --source_base_dir $source_base_dir \
     --target_base_dir $target_base_dir \
-    --pretrained_model $pretrained_model
+    --pretrained_model $pretrained_model \
+    --upper_data_size 500
