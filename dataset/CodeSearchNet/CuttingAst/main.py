@@ -109,6 +109,8 @@ def main() -> None:
 
     parser.add_argument("--pretrained_model", type=str)
 
+    parser.add_argument("--upper_data_size", type=int)
+
     args = parser.parse_args()
 
     deletion_types = ["front_seq", "back_seq", "rule_point", "all_point"]
@@ -117,6 +119,11 @@ def main() -> None:
         languages = ["go", "java", "javascript", "php", "python", "ruby"]
     else:
         languages = [args.lang]
+    
+    if args.upper_data_size:
+        UPPER_LIMIT = args.upper_data_size
+    else:
+        UPPER_LIMIT = 100
 
     for lang in languages:
         logging.info(f"=== {lang} ===")
@@ -133,7 +140,6 @@ def main() -> None:
             with open(f"{jsonl_path}") as f:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
-            UPPER_LIMIT = 100
             for num, _ in enumerate(tqdm(range(UPPER_LIMIT))):
                 line = jsonl[num]
 
