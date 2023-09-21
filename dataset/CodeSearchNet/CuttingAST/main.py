@@ -81,14 +81,18 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
         main_dict["edited_code_size_line"] = len(recover_code.split("\n"))
         main_dict["edited_code_size_tree"] = tree_size(pruned_ast)
 
-        main_dict["diff_size_char"] = Levenshtein.distance(main_dict["cleaned_code"], recover_code)
-        main_dict["diff_size_line"] = Levenshtein.distance(main_dict["cleaned_code"].split("\n"), recover_code.split("\n"))
-        main_dict["diff_size_node"]  = main_dict["cleaned_code_size_tree"] - main_dict["edited_code_size_tree"]
-        
         traverser = ATraverser()
         res = traverser.preorderTraverse(pruned_ast)
         main_dict["edited_ast_node_types"] = list(set(res.preNodeTypes))
 
+        main_dict["diff_size_char"] = Levenshtein.distance(main_dict["cleaned_code"], recover_code)
+        main_dict["diff_size_line"] = Levenshtein.distance(main_dict["cleaned_code"].split("\n"), recover_code.split("\n"))
+        main_dict["diff_size_node"]  = main_dict["cleaned_code_size_tree"] - main_dict["edited_code_size_tree"]
+
+        main_dict["cos_sim_diff_char"] = dist2cosSim(main_dict["diff_size_char"])
+        main_dict["cos_sim_diff_line"] = dist2cosSim(main_dict["diff_size_line"])
+        main_dict["cos_sim_diff_node"] = dist2cosSim(main_dict["diff_size_node"])
+        
         stored_jsonl.append(main_dict)
 
     return stored_jsonl
@@ -99,23 +103,26 @@ def main() -> None:
     '''This code create Cutting-AST dataset.
         
         {
-            "repo": the repository name
-            "path": file path name in the repository
-            "func_name": the function name in the repository
-            "original_string": original function
-            "cleaned_code": removed comments and docstrings
-            "cleaned_code_size_char": number of character
-            "cleaned_code_size_line": number of line
-            "cleaned_code_size_tree": size of tree
-            "cleaned_code_ast_node_types": a list of node types
-            "edited_code": edited code using node pruning
-            "edited_code_size_char": number of character
-            "edited_code_size_line": number of line
-            "edited_code_size_tree": size of tree
-            "diff_size_char": levenshtein distance of character between cleaned_code & edited_code
-            "diff_size_line": levenshtein distance of line between cleaned_code & edited_code
-            "diff_size_node": difference of tree size between cleaned_code & edited_code
-            "edited_ast_node_types": a list of node types
+            "repo": the repository name, 
+            "path": file path name in the repository, 
+            "func_name": the function name in the repository, 
+            "original_string": original function, 
+            "cleaned_code": removed comments and docstrings, 
+            "cleaned_code_size_char": number of character, 
+            "cleaned_code_size_line": number of line, 
+            "cleaned_code_size_tree": size of tree, 
+            "cleaned_code_ast_node_types": a list of node types, 
+            "edited_code": edited code using node pruning, 
+            "edited_code_size_char": number of character, 
+            "edited_code_size_line": number of line, 
+            "edited_code_size_tree": size of tree, 
+            "edited_ast_node_types": a list of node types, 
+            "diff_size_char": levenshtein distance of character between cleaned_code & edited_code, 
+            "diff_size_line": levenshtein distance of line between cleaned_code & edited_code, 
+            "diff_size_node": difference of tree size between cleaned_code & edited_code, 
+            "cos_sim_diff_char": conine similarity calculated using levenshtein distance of character, 
+            "cos_sim_diff_line": conine similarity calculated using levenshtein distance of line, 
+            "cos_sim_diff_node": conine similarity calculated using dff of tree size
         }
 
     '''
