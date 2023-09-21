@@ -11,4 +11,7 @@ python3 ../main.py \
     --pretrained_model $pretrained_model \
     --upper_data_size 500
 
-zip $target_base_dir -r $target_base_dir
+CURRENT=$(pwd)
+cd ../output
+zip CuttingAST -r CuttingAST
+cd $CURRENT
