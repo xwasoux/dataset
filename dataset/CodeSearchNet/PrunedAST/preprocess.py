@@ -23,6 +23,40 @@ def get_jsonl_path_list(base_dir:str) -> list:
 
 
 def main() -> None:
+    '''Extracted Json line data from Cleaned CodeSearchNet dataset.
+
+    Args:
+        None
+
+    Returns:
+        None
+    
+    Note:
+        Here is a Dataset structure.
+
+        {
+            "repo":                     repository name, 
+            "path":                     file path name in the repository, 
+            "func_name":                function name in the repository, 
+            "original_string":          original function, 
+            "language":                 programming language, 
+            "code":                     code strings (including comments & docstrings), 
+            "code_tokens":              tokenized from "code", 
+            "docstring":                docstring extracted by "code", 
+            "docstring_tokens":         tokenized from "docstring", 
+            "sha":                      sha id, 
+            "url":                      an URL of repository, 
+            "partition":                partition type of dataset, 
+            "cleaned_code":             a code removed comments & docstrings, 
+            "code_subtokens":           tokeized from "cleaned_code", 
+            "code_noindent":            removed spaces as indent, 
+            "code_noindent_subtokens":  tokenized from "code_noindent",
+            "flattened_code":           remove new line from "code_noindent", 
+            "flattened_code_subtokens": tokenized from "flattened_code", 
+        }
+
+    '''
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--lang", type=str)
