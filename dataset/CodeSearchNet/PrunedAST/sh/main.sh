@@ -1,6 +1,6 @@
 lang=python
 source_base_dir=../data/workbench/Extracted
-target_base_dir=../output/CuttingAST
+target_base_dir=../output/PrunedAST
 pretrained_model=microsoft/codebert-base
 
 python3 ../main.py \
@@ -13,5 +13,5 @@ python3 ../main.py \
 
 CURRENT=$(pwd)
 cd ../output
-zip CuttingAST -r CuttingAST
+zip PrunedAST -r PrunedAST
 cd $CURRENT
