@@ -41,7 +41,7 @@ class Pruner:
 
 def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenizer) -> list:
     stored_jsonl = []
-    label_is_named = lambda subtree: "NAMED" if subtree.is_named is True else "LEAF"
+    label_is_named = lambda subtree: "NON_TERMINAL" if subtree.is_named is True else "TERMINAL"
 
     for res_pair in pruned_res:
         pruned_ast = res_pair[0]
