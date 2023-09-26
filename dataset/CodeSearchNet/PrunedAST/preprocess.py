@@ -11,7 +11,9 @@ from tqdm import tqdm
 
 from transformers import AutoTokenizer
 
-from utils import get_jsonl_paths, remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code
+from astars import AParser,AParseTree, ATraverser, APruner
+
+from utils import get_jsonl_paths, remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code, tree_size
 
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -97,6 +99,12 @@ def main() -> None:
                 cleaned_code_subtokens = tokenizer.tokenize(cleaned_code)
                 line["cleaned_code_subtokens"] = cleaned_code_subtokens
 
+                if len(cleaned_code_subtokens) >= 510:
+                    continue
+
+                tree = AParser.parse(text=line["cleaned_code"], lang=lang)
+                line["cleaned_code_render"] = str(tree)
+
                 code_noindent = remove_spaces_and_tabs(cleaned_code)
                 line["code_noindent"] = code_noindent
                 line["code_noindent_subtokens"] = tokenizer.tokenize(code_noindent)
@@ -105,8 +113,23 @@ def main() -> None:
                 line["flattened_code"] = flattened_code
                 line["flattened_code_subtokens"] = tokenizer.tokenize(flattened_code)
 
-                if len(cleaned_code_subtokens) <= 510:
-                    extracted_jsonl.append(line)
+                cleaned_code = line["cleaned_code"]
+                line["cleaned_code_char_size"] = len(cleaned_code)
+                line["cleaned_code_line_size"] = len(cleaned_code.split("\n"))
+                line["cleaned_code_tree_size"] = tree_size(tree)
+
+                traverser = ATraverser()
+                res = traverser.preorderTraverse(tree)
+                line["cleaned_code_ast_node_types"] = list(set(res.preNodeTypes))
+
+                code_noindent = line["code_noindent"]
+                line["code_noindent_char_size"] = len(code_noindent)
+                line["code_noindent_line_size"] = len(code_noindent.split("\n"))
+
+                flattened_code = line["flattened_code"]
+                line["flattened_code_char_size"] = len(flattened_code)
+
+                extracted_jsonl.append(line)
 
             logging.info(f"New jsonl : {len(extracted_jsonl)}")
 

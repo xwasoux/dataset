@@ -37,26 +37,6 @@ class Pruner:
         pruned_res = APruner.seqPointingPrune(tree=tree)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
 
-def create_base_dict(original_dict:dict, tree:AParseTree) -> dict:
-
-    cleaned_code = original_dict["cleaned_code"]
-    original_dict["cleaned_code_char_size"] = len(cleaned_code)
-    original_dict["cleaned_code_line_size"] = len(cleaned_code.split("\n"))
-    original_dict["cleaned_code_tree_size"] = tree_size(tree)
-
-    traverser = ATraverser()
-    res = traverser.preorderTraverse(tree)
-    original_dict["cleaned_code_ast_node_types"] = list(set(res.preNodeTypes))
-
-    code_noindent = original_dict["code_noindent"]
-    original_dict["code_noindent_char_size"] = len(code_noindent)
-    original_dict["code_noindent_line_size"] = len(code_noindent.split("\n"))
-
-    flattened_code = original_dict["flattened_code"]
-    original_dict["flattened_code_char_size"] = len(flattened_code)
-                
-    return original_dict
-
 def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
     stored_jsonl = []
 
@@ -176,18 +156,16 @@ def main() -> None:
                 line = jsonl[num]
 
                 tree = AParser.parse(text=line["cleaned_code"], lang=lang)
-                line["cleaned_code_render"] = str(tree)
-                base_dict = create_base_dict(original_dict=line, tree=tree)
 
                 for each_type in deletion_types:
                     # logging.info(f"= {each_type} =")
                     pruner = Pruner()
                     get_pruned_res = getattr(pruner, each_type)
-                    stored_jsonl = get_pruned_res(args, tree, base_dict)
+                    stored_jsonl = get_pruned_res(args, tree, line)
 
                     os.makedirs(os.path.join(args.target_base_dir, lang, partition, each_type), exist_ok=True)
 
-                    corename = base_dict["path"].split("/")[-1].split(".")[0]
+                    corename = line["path"].split("/")[-1].split(".")[0]
                     stored_filename = os.path.join(args.target_base_dir, lang, partition, each_type, f"{each_type}_{corename}")
 
                     df = pd.DataFrame(stored_jsonl)
