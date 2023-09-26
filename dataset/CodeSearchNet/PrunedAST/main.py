@@ -6,9 +6,10 @@ import logging
 import argparse
 import Levenshtein
 import pandas as pd
-from glob import glob
 from tqdm import tqdm
 from copy import deepcopy
+
+from .utils import get_jsonl_paths
 
 from astars import AParser,AParseTree, ATraverser, APruner
 
@@ -35,10 +36,6 @@ class Pruner:
     def all_point(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
         pruned_res = APruner.seqPointingPrune(tree=tree)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
-
-def get_jsonl_paths(base_dir:str) -> list:
-    condition = f'{base_dir}/*.jsonl'
-    return glob(condition, recursive=True)
 
 def tree_size(tree:AParseTree) -> int:
     return len(tree.root.descendants)+1

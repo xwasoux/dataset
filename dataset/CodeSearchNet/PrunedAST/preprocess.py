@@ -11,15 +11,11 @@ from tqdm import tqdm
 
 from transformers import AutoTokenizer
 
-from utils import remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code
+from utils import get_jsonl_paths, remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code
 
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
-
-def get_jsonl_path_list(base_dir:str) -> list:
-    condition = f'{base_dir}/*.jsonl'
-    return glob(condition, recursive=True)
 
 
 def main() -> None:
@@ -78,7 +74,7 @@ def main() -> None:
 
     for lang in languages:
         logging.info(f"=== {lang} ===")
-        jsonl_path_list = get_jsonl_path_list(path.join(args.source_base_dir, lang))
+        jsonl_path_list = get_jsonl_paths(path.join(args.source_base_dir, lang))
         logging.info(jsonl_path_list)
 
         os.makedirs(path.join(args.target_base_dir, lang), exist_ok=True)
