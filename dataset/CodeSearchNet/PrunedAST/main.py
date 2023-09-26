@@ -103,7 +103,7 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
 
     
 def main() -> None:
-    '''This code create Cutting-AST dataset.
+    '''This code create Pruned AST dataset.
 
     Args: 
         None
