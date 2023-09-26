@@ -16,6 +16,26 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
+class Pruner:
+    def __init__(self) -> None:
+        pass
+    
+    def front_seq(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+        pruned_res = APruner.seqForwardPrune(tree=tree)
+        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
+
+    def back_seq(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+        pruned_res = APruner.seqBackwardPrune(tree=tree)
+        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
+
+    def rule_point(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+        pruned_res = APruner.selectedPointingPrune(tree=tree, selections=args.target_subtree_root)
+        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
+
+    def all_point(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+        pruned_res = APruner.seqPointingPrune(tree=tree)
+        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
+
 def get_jsonl_paths(base_dir:str) -> list:
     condition = f'{base_dir}/*.jsonl'
     return glob(condition, recursive=True)
@@ -45,26 +65,6 @@ def create_base_dict(original_dict:dict, tree:AParseTree) -> dict:
 
 def distance_to_cosine(distance:int) -> float:
     return 1/(1+distance)
-
-class Pruner:
-    def __init__(self) -> None:
-        pass
-    
-    def front_seq(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
-        pruned_res = APruner.seqForwardPrune(tree=tree)
-        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
-
-    def back_seq(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
-        pruned_res = APruner.seqBackwardPrune(tree=tree)
-        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
-
-    def rule_point(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
-        pruned_res = APruner.selectedPointingPrune(tree=tree, selections=args.target_subtree_root)
-        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
-
-    def all_point(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
-        pruned_res = APruner.seqPointingPrune(tree=tree)
-        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
 
 def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
     stored_jsonl = []
