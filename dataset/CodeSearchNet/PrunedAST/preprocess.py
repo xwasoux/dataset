@@ -56,10 +56,10 @@ def main() -> None:
             "cleaned_code_subtokens":       tokeized from "cleaned_code", 
             "cleaned_code_render":          render tree of "cleaned_code",
 
-            "code_noindent":                removed spaces as indent from "code_noindent", 
-            "code_noindent_subtokens":      tokenized from "code_noindent",
+            "noindent_code":                removed spaces as indent from "noindent_code", 
+            "noindent_code_subtokens":      tokenized from "noindent_code",
 
-            "flattened_code":               remove new line from "code_noindent", 
+            "flattened_code":               remove new line from "noindent_code", 
             "flattened_code_subtokens":     tokenized from "flattened_code", 
 
             "cleaned_code_char_size":       character number of "cleaned_code",
@@ -67,8 +67,8 @@ def main() -> None:
             "cleaned_code_tree_size":       tree node number of "cleaned_code",
             "cleaned_code_ast_node_types":  a list of node types,
 
-            "code_noindent_char_size":      character number of "code_noindent",
-            "code_noindent_line_size":      line number of "code_noindent",
+            "noindent_code_char_size":      character number of "noindent_code",
+            "noindent_code_line_size":      line number of "noindent_code",
 
             "flattened_code_char_size":     character number of "flattened_code",
         }
@@ -125,11 +125,11 @@ def main() -> None:
                 tree = AParser.parse(text=line["cleaned_code"], lang=lang)
                 line["cleaned_code_render"] = str(tree)
 
-                code_noindent = remove_spaces_and_tabs(cleaned_code)
-                line["code_noindent"] = code_noindent
-                line["code_noindent_subtokens"] = tokenizer.tokenize(code_noindent)
+                noindent_code = remove_spaces_and_tabs(cleaned_code)
+                line["noindent_code"] = noindent_code
+                line["noindent_code_subtokens"] = tokenizer.tokenize(noindent_code)
 
-                flattened_code = flatten_code(code_noindent)
+                flattened_code = flatten_code(noindent_code)
                 line["flattened_code"] = flattened_code
                 line["flattened_code_subtokens"] = tokenizer.tokenize(flattened_code)
 
@@ -142,9 +142,9 @@ def main() -> None:
                 res = traverser.preorderTraverse(tree)
                 line["cleaned_code_ast_node_types"] = list(set(res.preNodeTypes))
 
-                code_noindent = line["code_noindent"]
-                line["code_noindent_char_size"] = len(code_noindent)
-                line["code_noindent_line_size"] = len(code_noindent.split("\n"))
+                noindent_code = line["noindent_code"]
+                line["noindent_code_char_size"] = len(noindent_code)
+                line["noindent_code_line_size"] = len(noindent_code.split("\n"))
 
                 flattened_code = line["flattened_code"]
                 line["flattened_code_char_size"] = len(flattened_code)
