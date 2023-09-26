@@ -91,9 +91,9 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
         main_dict["cleaned_code_diff_line_size"] = Levenshtein.distance(main_dict["cleaned_code"].split("\n"), recover_code.split("\n"))
         main_dict["cleaned_code_diff_size_node"]  = main_dict["cleaned_code_tree_size"] - main_dict["edited_code_tree_size"]
 
-        main_dict["cosine_char"] = distance_to_cosine(main_dict["cleaned_code_diff_char_size"])
-        main_dict["cosine_line"] = distance_to_cosine(main_dict["cleaned_code_diff_line_size"])
-        main_dict["cosine_node"] = distance_to_cosine(main_dict["cleaned_code_diff_size_node"])
+        main_dict["cleaned_code_cosine_char"] = distance_to_cosine(main_dict["cleaned_code_diff_char_size"])
+        main_dict["cleaned_code_cosine_line"] = distance_to_cosine(main_dict["cleaned_code_diff_line_size"])
+        main_dict["cleaned_code_cosine_node"] = distance_to_cosine(main_dict["cleaned_code_diff_size_node"])
         
 
     return stored_jsonl
