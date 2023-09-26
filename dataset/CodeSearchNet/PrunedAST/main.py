@@ -48,15 +48,15 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
         subtree = res_pair[1]
 
         main_dict = deepcopy(base_dict)
-        recover_code = pruned_ast.recover()
+        edited_code = pruned_ast.recover()
 
         ## edited_code
-        main_dict["edited_code"] = recover_code
-        main_dict["edited_code_subtokens"] = tokenizer.tokenize(recover_code)
-        main_dict["edited_code_render"] = str(recover_code)
+        main_dict["edited_code"] = edited_code
+        main_dict["edited_code_subtokens"] = tokenizer.tokenize(edited_code)
+        main_dict["edited_code_render"] = str(edited_code)
 
         ## edited_noindent_code
-        edited_noindent_code = remove_spaces_and_tabs(recover_code)
+        edited_noindent_code = remove_spaces_and_tabs(edited_code)
         main_dict["edited_noindent_code"] = edited_noindent_code
         main_dict["edited_noindent_code_subtokens"] = tokenizer.tokenize(edited_noindent_code)
 
@@ -65,8 +65,8 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
         main_dict["edited_flattened_code"] = edited_flattened_code
         main_dict["edited_flattened_code_subtokens"] = tokenizer.tokenize(edited_flattened_code)
 
-        main_dict["edited_code_char_size"] = len(recover_code)
-        main_dict["edited_code_line_size"] = len(recover_code.split("\n"))
+        main_dict["edited_code_char_size"] = len(edited_code)
+        main_dict["edited_code_line_size"] = len(edited_code.split("\n"))
         main_dict["edited_code_tree_size"] = tree_size(pruned_ast)
 
         traverser = ATraverser()
@@ -78,8 +78,8 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
         
 
         ## cleaned_code distance infomations
-        main_dict["cleaned_code_diff_char_size"] = Levenshtein.distance(main_dict["cleaned_code"], recover_code)
-        main_dict["cleaned_code_diff_line_size"] = Levenshtein.distance(main_dict["cleaned_code"].split("\n"), recover_code.split("\n"))
+        main_dict["cleaned_code_diff_char_size"] = Levenshtein.distance(main_dict["cleaned_code"], edited_code)
+        main_dict["cleaned_code_diff_line_size"] = Levenshtein.distance(main_dict["cleaned_code"].split("\n"), edited_code.split("\n"))
         main_dict["cleaned_code_diff_size_node"]  = main_dict["cleaned_code_tree_size"] - main_dict["edited_code_tree_size"]
 
         main_dict["cleaned_code_cosine_char"] = distance_to_cosine(main_dict["cleaned_code_diff_char_size"])
@@ -205,7 +205,6 @@ def main() -> None:
                     pruner = Pruner()
                     get_pruned_res = getattr(pruner, pruning)
                     stored_jsonl = get_pruned_res(args, tree, line, tokenizer)
-                    return
 
                     os.makedirs(os.path.join(args.target_base_dir, lang, partition, pruning), exist_ok=True)
 
