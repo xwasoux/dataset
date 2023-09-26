@@ -21,19 +21,19 @@ class Pruner:
     def __init__(self) -> None:
         pass
     
-    def front_seq(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+    def sequence_forward(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
         pruned_res = APruner.seqForwardPrune(tree=tree)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
 
-    def back_seq(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+    def sequence_backward(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
         pruned_res = APruner.seqBackwardPrune(tree=tree)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
 
-    def rule_point(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+    def point_rule(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
         pruned_res = APruner.selectedPointingPrune(tree=tree, selections=args.target_subtree_root)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
 
-    def all_point(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+    def point_all(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
         pruned_res = APruner.seqPointingPrune(tree=tree)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
 
@@ -125,7 +125,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    deletion_types = ["front_seq", "back_seq", "rule_point", "all_point"]
+    deletion_types = ("sequence_forward", "sequence_backward", "point_rule", "point_all")
 
     if args.all_lang:
         languages = ["go", "java", "javascript", "php", "python", "ruby"]
