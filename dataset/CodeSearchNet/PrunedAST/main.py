@@ -125,7 +125,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    deletion_types = ("sequence_forward", "sequence_backward", "point_rule", "point_all")
+    pruning_types = ("sequence_forward", "sequence_backward", "point_rule", "point_all")
 
     if args.all_lang:
         languages = ["go", "java", "javascript", "php", "python", "ruby"]
@@ -157,16 +157,16 @@ def main() -> None:
 
                 tree = AParser.parse(text=line["cleaned_code"], lang=lang)
 
-                for each_type in deletion_types:
-                    # logging.info(f"= {each_type} =")
+                for pruning in pruning_types:
+                    # logging.info(f"= {pruning} =")
                     pruner = Pruner()
-                    get_pruned_res = getattr(pruner, each_type)
+                    get_pruned_res = getattr(pruner, pruning)
                     stored_jsonl = get_pruned_res(args, tree, line)
 
-                    os.makedirs(os.path.join(args.target_base_dir, lang, partition, each_type), exist_ok=True)
+                    os.makedirs(os.path.join(args.target_base_dir, lang, partition, pruning), exist_ok=True)
 
                     corename = line["path"].split("/")[-1].split(".")[0]
-                    stored_filename = os.path.join(args.target_base_dir, lang, partition, each_type, f"{each_type}_{corename}")
+                    stored_filename = os.path.join(args.target_base_dir, lang, partition, pruning, f"{pruning}_{corename}")
 
                     df = pd.DataFrame(stored_jsonl)
                     df.to_json(f"{stored_filename}.jsonl", orient="records", force_ascii=False, lines=True)
