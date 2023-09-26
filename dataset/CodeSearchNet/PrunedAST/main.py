@@ -11,7 +11,7 @@ from copy import deepcopy
 
 from transformers import AutoTokenizer
 
-from .utils import get_jsonl_paths, remove_spaces_and_tabs, flatten_code, tree_size, distance_to_cosine
+from utils import get_jsonl_paths, remove_spaces_and_tabs, flatten_code, tree_size, distance_to_cosine
 
 from astars import AParser,AParseTree, ATraverser, APruner
 
@@ -41,6 +41,7 @@ class Pruner:
 
 def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenizer) -> list:
     stored_jsonl = []
+    label_is_named = lambda subtree: "NAMED" if subtree.is_named is True else "LEAF"
 
     for res_pair in pruned_res:
         pruned_ast = res_pair[0]
@@ -49,9 +50,20 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
         main_dict = deepcopy(base_dict)
         recover_code = pruned_ast.recover()
 
+        ## edited_code
         main_dict["edited_code"] = recover_code
         main_dict["edited_code_subtokens"] = tokenizer.tokenize(recover_code)
         main_dict["edited_code_render"] = str(recover_code)
+
+        ## edited_noindent_code
+        edited_noindent_code = remove_spaces_and_tabs(recover_code)
+        main_dict["edited_noindent_code"] = edited_noindent_code
+        main_dict["edited_noindent_code_subtokens"] = tokenizer.tokenize(edited_noindent_code)
+
+        ## edited_flattened_code
+        edited_flattened_code = flatten_code(edited_noindent_code)
+        main_dict["edited_flattened_code"] = edited_flattened_code
+        main_dict["edited_flattened_code_subtokens"] = tokenizer.tokenize(edited_flattened_code)
 
         main_dict["edited_code_char_size"] = len(recover_code)
         main_dict["edited_code_line_size"] = len(recover_code.split("\n"))
@@ -62,7 +74,7 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
         main_dict["edited_code_ast_node_types"] = list(set(pruned_ast_res.preNodeTypes))
 
         main_dict["pruned_node_type"] = subtree.type
-        main_dict["pruned_node_is_named"] = lambda subtree.is_named: "NAMED" if subtree.is_named is True else "LEAF"
+        main_dict["pruned_node_is_named"] = label_is_named(subtree=subtree)
         
 
         ## cleaned_code distance infomations
@@ -74,15 +86,15 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
         main_dict["cleaned_code_cosine_line"] = distance_to_cosine(main_dict["cleaned_code_diff_line_size"])
         main_dict["cleaned_code_cosine_node"] = distance_to_cosine(main_dict["cleaned_code_diff_size_node"])
 
-        ## code_noindent distance infomation
-        main_dict["code_noindent_diff_char_size"] = Levenshtein.distance(main_dict["code_noindent"], recover_code)
-        main_dict["code_noindent_diff_line_size"] = Levenshtein.distance(main_dict["code_noindent"].split("\n"), recover_code.split("\n"))
+        ## noindent_code distance infomation
+        main_dict["noindent_code_diff_char_size"] = Levenshtein.distance(main_dict["noindent_code"], edited_noindent_code)
+        main_dict["noindent_code_diff_line_size"] = Levenshtein.distance(main_dict["noindent_code"].split("\n"), edited_noindent_code.split("\n"))
 
-        main_dict["cleaned_code_cosine_char"] = distance_to_cosine(main_dict["code_noindent_diff_char_size"])
-        main_dict["cleaned_code_cosine_line"] = distance_to_cosine(main_dict["code_noindent_diff_line_size"])
+        main_dict["noindent_code_cosine_char"] = distance_to_cosine(main_dict["noindent_code_diff_char_size"])
+        main_dict["noindent_code_cosine_line"] = distance_to_cosine(main_dict["noindent_code_diff_line_size"])
         
         ## flattened_code distance infomation
-        main_dict["flattened_code_diff_char_size"] = Levenshtein.distance(main_dict["flattened_code"], recover_code)
+        main_dict["flattened_code_diff_char_size"] = Levenshtein.distance(main_dict["flattened_code"], edited_flattened_code)
 
         main_dict["flattened_code_cosine_char"] = distance_to_cosine(main_dict["flattened_code_diff_char_size"])
         
@@ -103,26 +115,38 @@ def main() -> None:
         Here is a Dataset structure.
         
         {
-            "repo":                         repository name, 
-            "path":                         file path name in the repository, 
-            "func_name":                    function name in the repository, 
-            "original_string":              original function, 
-            "cleaned_code":                 removed comments and docstrings, 
-            "cleaned_code_char_size":       number of character, 
-            "cleaned_code_line_size":       number of line, 
-            "cleaned_code_tree_size":       size of tree, 
-            "cleaned_code_ast_node_types":  a list of node types, 
-            "edited_code":                  an edited code using node pruning, 
-            "edited_code_char_size":        number of character, 
-            "edited_code_line_size":        number of line, 
-            "edited_code_tree_size":        size of tree, 
-            "edited_ast_node_types":        a list of node types, 
-            "diff_char_size":               levenshtein distance of character between cleaned_code & edited_code, 
-            "diff_line_size":               levenshtein distance of line between cleaned_code & edited_code, 
-            "diff_size_node":               difference of tree size between cleaned_code & edited_code, 
-            "cosine_char":            conine similarity calculated using levenshtein distance of character, 
-            "cosine_line":            conine similarity calculated using levenshtein distance of line, 
-            "cosine_node":            conine similarity calculated using dff of tree size
+            ## Default Data
+
+            "repo" ~ "cleaned_code_ast_node_types", 
+
+            ## Appended Data
+
+            "edited_code":                      an edited code using node pruning, 
+            "edited_code_subtokens":            tokenized from "edited_code",
+            "edited_code_render":               render tree of "edited_code",
+            
+            "edited_code_char_size":            character number of "edited_code", 
+            "edited_code_line_size":            line number of "edited_code", 
+            "edited_code_tree_size":            tree node number of "edited_code", 
+            "edited_code_ast_node_types":       a list of node types, 
+
+            "pruned_node_type":                 some pruned node type, 
+            "pruned_node_is_named":             LEAF node or not,
+
+            "cleaned_code_diff_char_size":      levenshtein distance of character between "cleaned_code" & "edited_code", 
+            "cleaned_code_diff_line_size":      levenshtein distance of line between "cleaned_code" & "edited_code", 
+            "cleaned_code_diff_size_node":      difference of tree size between "cleaned_code" & "edited_code", 
+            "cleaned_code_cosine_char":         conine similarity calculated using levenshtein distance of character, 
+            "cleaned_code_cosine_line":         conine similarity calculated using levenshtein distance of line, 
+            "cleaned_code_cosine_node":         conine similarity calculated using dff of tree size
+
+            "noindent_code_diff_char_size":,
+            "noindent_code_diff_line_size":,
+            "noindent_code_cosine_char":,
+            "noindent_code_cosine_line":,
+            
+            "flattened_code_diff_char_size":,
+            "flattened_code_cosine_char":,
         }
 
     '''
@@ -181,6 +205,7 @@ def main() -> None:
                     pruner = Pruner()
                     get_pruned_res = getattr(pruner, pruning)
                     stored_jsonl = get_pruned_res(args, tree, line, tokenizer)
+                    return
 
                     os.makedirs(os.path.join(args.target_base_dir, lang, partition, pruning), exist_ok=True)
 
