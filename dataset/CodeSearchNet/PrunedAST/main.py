@@ -9,7 +9,7 @@ import pandas as pd
 from tqdm import tqdm
 from copy import deepcopy
 
-from .utils import get_jsonl_paths
+from .utils import get_jsonl_paths, remove_spaces_and_tabs, flatten_code, tree_size, distance_to_cosine
 
 from astars import AParser,AParseTree, ATraverser, APruner
 
@@ -37,9 +37,6 @@ class Pruner:
         pruned_res = APruner.seqPointingPrune(tree=tree)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
 
-def tree_size(tree:AParseTree) -> int:
-    return len(tree.root.descendants)+1
-    
 def create_base_dict(original_dict:dict, tree:AParseTree) -> dict:
 
     cleaned_code = original_dict["cleaned_code"]
@@ -59,9 +56,6 @@ def create_base_dict(original_dict:dict, tree:AParseTree) -> dict:
     original_dict["flattened_code_char_size"] = len(flattened_code)
                 
     return original_dict
-
-def distance_to_cosine(distance:int) -> float:
-    return 1/(1+distance)
 
 def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
     stored_jsonl = []
@@ -95,7 +89,6 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
         main_dict["cleaned_code_cosine_line"] = distance_to_cosine(main_dict["cleaned_code_diff_line_size"])
         main_dict["cleaned_code_cosine_node"] = distance_to_cosine(main_dict["cleaned_code_diff_size_node"])
         
-
     return stored_jsonl
 
 
