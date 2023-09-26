@@ -117,7 +117,7 @@ def main() -> None:
         {
             ## Default Data
 
-            "repo" ~ "cleaned_code_ast_node_types", 
+            "repo" ~ "flattened_code_char_size", 
 
             ## Appended Data
 
@@ -125,13 +125,19 @@ def main() -> None:
             "edited_code_subtokens":            tokenized from "edited_code",
             "edited_code_render":               render tree of "edited_code",
             
+            "edited_noindent_code":             removed spaces as indent from "edited_code",
+            "edited_noindent_code_subtokens":   tokeized from "cleaned_code",
+
+            "edited_flattened_code":            remove new line from "noindent_code",
+            "edited_flattened_code_subtokens":  tokeized from "cleaned_code",
+
             "edited_code_char_size":            character number of "edited_code", 
             "edited_code_line_size":            line number of "edited_code", 
             "edited_code_tree_size":            tree node number of "edited_code", 
             "edited_code_ast_node_types":       a list of node types, 
 
             "pruned_node_type":                 some pruned node type, 
-            "pruned_node_is_named":             LEAF node or not,
+            "pruned_node_is_named":             Terminal node or Non-Terminal node,
 
             "cleaned_code_diff_char_size":      levenshtein distance of character between "cleaned_code" & "edited_code", 
             "cleaned_code_diff_line_size":      levenshtein distance of line between "cleaned_code" & "edited_code", 
@@ -140,13 +146,13 @@ def main() -> None:
             "cleaned_code_cosine_line":         conine similarity calculated using levenshtein distance of line, 
             "cleaned_code_cosine_node":         conine similarity calculated using dff of tree size
 
-            "noindent_code_diff_char_size":,
-            "noindent_code_diff_line_size":,
-            "noindent_code_cosine_char":,
-            "noindent_code_cosine_line":,
+            "noindent_code_diff_char_size":     levenshtein distance of character between "noindent_code" & "edited_noindent_code",
+            "noindent_code_diff_line_size":     levenshtein distance of line between "noindent_code" & "edited_noindent_code",
+            "noindent_code_cosine_char":        conine similarity calculated using levenshtein distance of character,
+            "noindent_code_cosine_line":        conine similarity calculated using levenshtein distance of line,
             
-            "flattened_code_diff_char_size":,
-            "flattened_code_cosine_char":,
+            "flattened_code_diff_char_size":    levenshtein distance of character between "flattened_code" & "edited_flattened_code",
+            "flattened_code_cosine_char":       conine similarity calculated using levenshtein distance of character,
         }
 
     '''
