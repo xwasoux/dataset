@@ -173,11 +173,6 @@ def main() -> None:
     else:
         languages = [args.lang]
     
-    if args.upper_data_size:
-        UPPER_LIMIT = args.upper_data_size
-    else:
-        UPPER_LIMIT = 100
-
     tokenizer = AutoTokenizer.from_pretrained(args.pretrained_model)
 
     for lang in languages:
@@ -195,6 +190,11 @@ def main() -> None:
             with open(f"{jsonl_path}") as f:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
+            if args.upper_data_size:
+                UPPER_LIMIT = args.upper_data_size
+            else:
+                UPPER_LIMIT = len(jsonl)
+
             for num, _ in enumerate(tqdm(range(UPPER_LIMIT))):
                 line = jsonl[num]
 
