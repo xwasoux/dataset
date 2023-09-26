@@ -48,7 +48,7 @@ def main() -> None:
             "url":                      an URL of repository, 
             "partition":                partition type of dataset, 
             "cleaned_code":             a code removed comments & docstrings, 
-            "code_subtokens":           tokeized from "cleaned_code", 
+            "cleaned_code_subtokens":           tokeized from "cleaned_code", 
             "code_noindent":            removed spaces as indent, 
             "code_noindent_subtokens":  tokenized from "code_noindent",
             "flattened_code":           remove new line from "code_noindent", 
@@ -98,8 +98,8 @@ def main() -> None:
                     continue
                 
                 line["cleaned_code"] = cleaned_code
-                code_subtokens = tokenizer.tokenize(cleaned_code)
-                line["code_subtokens"] = code_subtokens
+                cleaned_code_subtokens = tokenizer.tokenize(cleaned_code)
+                line["cleaned_code_subtokens"] = cleaned_code_subtokens
 
                 code_noindent = remove_spaces_and_tabs(cleaned_code)
                 line["code_noindent"] = code_noindent
@@ -109,7 +109,7 @@ def main() -> None:
                 line["flattened_code"] = flattened_code
                 line["flattened_code_subtokens"] = tokenizer.tokenize(flattened_code)
 
-                if len(code_subtokens) <= 510:
+                if len(cleaned_code_subtokens) <= 510:
                     extracted_jsonl.append(line)
 
             logging.info(f"New jsonl : {len(extracted_jsonl)}")
