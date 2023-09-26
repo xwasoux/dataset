@@ -9,6 +9,8 @@ import pandas as pd
 from tqdm import tqdm
 from copy import deepcopy
 
+from transformers import AutoTokenizer
+
 from .utils import get_jsonl_paths, remove_spaces_and_tabs, flatten_code, tree_size, distance_to_cosine
 
 from astars import AParser,AParseTree, ATraverser, APruner
@@ -21,23 +23,23 @@ class Pruner:
     def __init__(self) -> None:
         pass
     
-    def sequence_forward(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+    def sequence_forward(self, args:argparse, tree:AParseTree, base_dict:dict, tokenizer:AutoTokenizer) -> dict:
         pruned_res = APruner.seqForwardPrune(tree=tree)
-        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
+        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res, tokenizer=tokenizer)
 
-    def sequence_backward(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+    def sequence_backward(self, args:argparse, tree:AParseTree, base_dict:dict, tokenizer:AutoTokenizer) -> dict:
         pruned_res = APruner.seqBackwardPrune(tree=tree)
-        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
+        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res, tokenizer=tokenizer)
 
-    def point_rule(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+    def point_rule(self, args:argparse, tree:AParseTree, base_dict:dict, tokenizer:AutoTokenizer) -> dict:
         pruned_res = APruner.selectedPointingPrune(tree=tree, selections=args.target_subtree_root)
-        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
+        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res, tokenizer=tokenizer)
 
-    def point_all(self, args:argparse, tree:AParseTree, base_dict:dict) -> dict:
+    def point_all(self, args:argparse, tree:AParseTree, base_dict:dict, tokenizer:AutoTokenizer) -> dict:
         pruned_res = APruner.seqPointingPrune(tree=tree)
-        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res)
+        return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res, tokenizer=tokenizer)
 
-def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
+def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenizer) -> list:
     stored_jsonl = []
 
     for res_pair in pruned_res:
@@ -48,19 +50,22 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
         recover_code = pruned_ast.recover()
 
         main_dict["edited_code"] = recover_code
+        main_dict["edited_code_subtokens"] = tokenizer.tokenize(recover_code)
         main_dict["edited_code_render"] = str(recover_code)
+
         main_dict["edited_code_char_size"] = len(recover_code)
         main_dict["edited_code_line_size"] = len(recover_code.split("\n"))
         main_dict["edited_code_tree_size"] = tree_size(pruned_ast)
 
         traverser = ATraverser()
-
         pruned_ast_res = traverser.preorderTraverse(pruned_ast)
-        main_dict["edited_ast_node_types"] = list(set(pruned_ast_res.preNodeTypes))
+        main_dict["edited_code_ast_node_types"] = list(set(pruned_ast_res.preNodeTypes))
 
         main_dict["pruned_node_type"] = subtree.type
-        main_dict["pruned_node_is_named"] = subtree.is_named
+        main_dict["pruned_node_is_named"] = lambda subtree.is_named: "NAMED" if subtree.is_named is True else "LEAF"
+        
 
+        ## cleaned_code distance infomations
         main_dict["cleaned_code_diff_char_size"] = Levenshtein.distance(main_dict["cleaned_code"], recover_code)
         main_dict["cleaned_code_diff_line_size"] = Levenshtein.distance(main_dict["cleaned_code"].split("\n"), recover_code.split("\n"))
         main_dict["cleaned_code_diff_size_node"]  = main_dict["cleaned_code_tree_size"] - main_dict["edited_code_tree_size"]
@@ -68,6 +73,18 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple) -> list:
         main_dict["cleaned_code_cosine_char"] = distance_to_cosine(main_dict["cleaned_code_diff_char_size"])
         main_dict["cleaned_code_cosine_line"] = distance_to_cosine(main_dict["cleaned_code_diff_line_size"])
         main_dict["cleaned_code_cosine_node"] = distance_to_cosine(main_dict["cleaned_code_diff_size_node"])
+
+        ## code_noindent distance infomation
+        main_dict["code_noindent_diff_char_size"] = Levenshtein.distance(main_dict["code_noindent"], recover_code)
+        main_dict["code_noindent_diff_line_size"] = Levenshtein.distance(main_dict["code_noindent"].split("\n"), recover_code.split("\n"))
+
+        main_dict["cleaned_code_cosine_char"] = distance_to_cosine(main_dict["code_noindent_diff_char_size"])
+        main_dict["cleaned_code_cosine_line"] = distance_to_cosine(main_dict["code_noindent_diff_line_size"])
+        
+        ## flattened_code distance infomation
+        main_dict["flattened_code_diff_char_size"] = Levenshtein.distance(main_dict["flattened_code"], recover_code)
+
+        main_dict["flattened_code_cosine_char"] = distance_to_cosine(main_dict["flattened_code_diff_char_size"])
         
     return stored_jsonl
 
@@ -137,6 +154,8 @@ def main() -> None:
     else:
         UPPER_LIMIT = 100
 
+    tokenizer = AutoTokenizer.from_pretrained(args.pretrained_model)
+
     for lang in languages:
         logging.info(f"=== {lang} ===")
         retrive_jsonl_paths = get_jsonl_paths(os.path.join(args.source_base_dir, lang))
@@ -161,7 +180,7 @@ def main() -> None:
                     # logging.info(f"= {pruning} =")
                     pruner = Pruner()
                     get_pruned_res = getattr(pruner, pruning)
-                    stored_jsonl = get_pruned_res(args, tree, line)
+                    stored_jsonl = get_pruned_res(args, tree, line, tokenizer)
 
                     os.makedirs(os.path.join(args.target_base_dir, lang, partition, pruning), exist_ok=True)
 
