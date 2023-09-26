@@ -169,7 +169,7 @@ def main() -> None:
     pruning_types = ("sequence_forward", "sequence_backward", "point_rule", "point_all")
 
     if args.all_lang:
-        languages = ["go", "java", "javascript", "php", "python", "ruby"]
+        languages = ("go", "java", "javascript", "php", "python", "ruby")
     else:
         languages = [args.lang]
     
