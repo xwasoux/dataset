@@ -31,11 +31,11 @@ class Pruner:
         pruned_res = APruner.seqBackwardPrune(tree=tree)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res, tokenizer=tokenizer)
 
-    def point_rule(self, args:argparse, tree:AParseTree, base_dict:dict, tokenizer:AutoTokenizer) -> dict:
+    def single_selected(self, args:argparse, tree:AParseTree, base_dict:dict, tokenizer:AutoTokenizer) -> dict:
         pruned_res = APruner.selectedPointingPrune(tree=tree, selections=args.target_subtree_root)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res, tokenizer=tokenizer)
 
-    def point_all(self, args:argparse, tree:AParseTree, base_dict:dict, tokenizer:AutoTokenizer) -> dict:
+    def single_complete(self, args:argparse, tree:AParseTree, base_dict:dict, tokenizer:AutoTokenizer) -> dict:
         pruned_res = APruner.seqPointingPrune(tree=tree)
         return append_ast_cut_dict(base_dict=base_dict, pruned_res=pruned_res, tokenizer=tokenizer)
 
@@ -173,7 +173,7 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    pruning_types = ("sequence_forward", "sequence_backward", "point_rule", "point_all")
+    pruning_types = ("sequence_forward", "sequence_backward", "single_selected", "single_complete")
 
     if args.all_lang:
         languages = ("go", "java", "javascript", "php", "python", "ruby")
