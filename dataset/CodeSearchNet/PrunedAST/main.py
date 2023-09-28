@@ -80,11 +80,11 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
         ## cleaned_code distance infomations
         main_dict["cleaned_code_diff_char_size"] = Levenshtein.distance(main_dict["cleaned_code"], edited_code)
         main_dict["cleaned_code_diff_line_size"] = Levenshtein.distance(main_dict["cleaned_code"].split("\n"), edited_code.split("\n"))
-        main_dict["cleaned_code_diff_size_node"]  = main_dict["cleaned_code_tree_size"] - main_dict["edited_code_tree_size"]
+        main_dict["cleaned_code_diff_node_size"]  = main_dict["cleaned_code_tree_size"] - main_dict["edited_code_tree_size"]
 
         main_dict["cleaned_code_cosine_char"] = distance_to_cosine(main_dict["cleaned_code_diff_char_size"])
         main_dict["cleaned_code_cosine_line"] = distance_to_cosine(main_dict["cleaned_code_diff_line_size"])
-        main_dict["cleaned_code_cosine_node"] = distance_to_cosine(main_dict["cleaned_code_diff_size_node"])
+        main_dict["cleaned_code_cosine_node"] = distance_to_cosine(main_dict["cleaned_code_diff_node_size"])
 
         ## noindent_code distance infomation
         main_dict["noindent_code_diff_char_size"] = Levenshtein.distance(main_dict["noindent_code"], edited_noindent_code)
@@ -142,7 +142,7 @@ def main() -> None:
 
             "cleaned_code_diff_char_size":      levenshtein distance of character between "cleaned_code" & "edited_code", 
             "cleaned_code_diff_line_size":      levenshtein distance of line between "cleaned_code" & "edited_code", 
-            "cleaned_code_diff_size_node":      difference of tree size between "cleaned_code" & "edited_code", 
+            "cleaned_code_diff_node_size":      difference of tree size between "cleaned_code" & "edited_code", 
             "cleaned_code_cosine_char":         conine similarity calculated using levenshtein distance of character, 
             "cleaned_code_cosine_line":         conine similarity calculated using levenshtein distance of line, 
             "cleaned_code_cosine_node":         conine similarity calculated using dff of tree size
