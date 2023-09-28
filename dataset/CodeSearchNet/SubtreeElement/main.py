@@ -15,28 +15,11 @@ from copy import deepcopy
 from astars import ANode, AParser, AstAnalyser, AstOperator, ACodeGenerator, AllNodeTraverser, ANamedTraverser, ATypeTraverser
 from transformers import AutoTokenizer
 
+from utils import *
+
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
-
-def get_jsonl_paths(base_dir:str) -> list:
-    condition = f'{base_dir}/*.jsonl'
-    return glob(condition, recursive=True)
-
-
-def remove_comments(code) -> str:
-    code = re.sub(r'\"\"\"(.|\n)*?\"\"\"', '', code)   # """comments"""
-    code = re.sub(r"\'\'\'(.|\n)*?\'\'\'", '', code)   # '''comments'''
-    code = re.sub(r'\#.*', '', code)                   ##comments
-    return code
-
-def get_subtree_elements(tree:ANode, target_units:list) -> list:
-
-    traverse_res = ATypeTraverser.leftPreOrder(tree)
-    subtree_elem = [node for node in traverse_res if node in target_units]
-
-    return subtree_elem
-
 
 
     
@@ -73,7 +56,7 @@ def main() -> None:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
             for line in tqdm(jsonl):
-                code = remove_comments(line["original_string"])
+                code = remove_comments_and_docstrings(line["original_string"])
                 line["code_pure"] = code
                 
                 parser = AParser()
