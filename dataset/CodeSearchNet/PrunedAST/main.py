@@ -53,7 +53,7 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
         ## edited_code
         main_dict["edited_code"] = edited_code
         main_dict["edited_code_subtokens"] = tokenizer.tokenize(edited_code)
-        main_dict["edited_code_render"] = str(edited_code)
+        main_dict["edited_code_render"] = str(pruned_ast)
 
         ## edited_noindent_code
         edited_noindent_code = remove_spaces_and_tabs(edited_code)
@@ -98,6 +98,7 @@ def append_ast_cut_dict(base_dict:dict, pruned_res:tuple, tokenizer:AutoTokenize
 
         main_dict["flattened_code_cosine_char"] = distance_to_cosine(main_dict["flattened_code_diff_char_size"])
         
+        stored_jsonl.append(main_dict)
     return stored_jsonl
 
 
