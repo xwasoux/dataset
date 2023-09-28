@@ -3,7 +3,7 @@ from io import StringIO
 import  tokenize
 from glob import glob
 
-from astars import AParseTree
+from astars import ANode, AParseTree
 
 def get_jsonl_paths(base_dir:str) -> list:
     condition = f'{base_dir}/*.jsonl'
