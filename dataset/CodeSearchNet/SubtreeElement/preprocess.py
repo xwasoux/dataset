@@ -11,18 +11,70 @@ from tqdm import tqdm
 
 from transformers import AutoTokenizer
 
-from utils import remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code
+from astars import AParser,AParseTree, ATraverser, APruner
+
+from utils import get_jsonl_paths, remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code, tree_size
 
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
 
-def get_jsonl_path_list(base_dir:str) -> list:
-    condition = f'{base_dir}/*.jsonl'
-    return glob(condition, recursive=True)
-
 
 def main() -> None:
+    '''Extracted Json line data from Cleaned CodeSearchNet dataset.
+
+    Args:
+        None
+
+    Returns:
+        None
+    
+    Note:
+        Here is a Dataset structure.
+
+        {
+            ## Original Data
+
+            "repo":                         repository name, 
+            "path":                         file path name in the repository, 
+            "func_name":                    function name in the repository, 
+            "original_string":              original function, 
+            "language":                     programming language, 
+
+            "code":                         code strings (including comments & docstrings), 
+            "code_tokens":                  tokenized from "code", 
+            "docstring":                    docstring extracted by "code", 
+            "docstring_tokens":             tokenized from "docstring", 
+
+            "sha":                          sha id, 
+            "url":                          an URL of repository, 
+            "partition":                    partition type of dataset, 
+
+            ## Appended Data
+
+            "cleaned_code":                 a code removed comments & docstrings, 
+            "cleaned_code_subtokens":       tokeized from "cleaned_code", 
+            "cleaned_code_render":          render tree of "cleaned_code",
+
+            "noindent_code":                removed spaces as indent from "noindent_code", 
+            "noindent_code_subtokens":      tokenized from "noindent_code",
+
+            "flattened_code":               remove new line from "noindent_code", 
+            "flattened_code_subtokens":     tokenized from "flattened_code", 
+
+            "cleaned_code_char_size":       character number of "cleaned_code",
+            "cleaned_code_line_size":       line number of "cleaned_code",
+            "cleaned_code_tree_size":       tree node number of "cleaned_code",
+            "cleaned_code_ast_node_types":  a list of node types,
+
+            "noindent_code_char_size":      character number of "noindent_code",
+            "noindent_code_line_size":      line number of "noindent_code",
+
+            "flattened_code_char_size":     character number of "flattened_code",
+        }
+
+    '''
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--lang", type=str)
@@ -44,7 +96,7 @@ def main() -> None:
 
     for lang in languages:
         logging.info(f"=== {lang} ===")
-        jsonl_path_list = get_jsonl_path_list(path.join(args.source_base_dir, lang))
+        jsonl_path_list = get_jsonl_paths(path.join(args.source_base_dir, lang))
         logging.info(jsonl_path_list)
 
         os.makedirs(path.join(args.target_base_dir, lang), exist_ok=True)
@@ -64,19 +116,40 @@ def main() -> None:
                     continue
                 
                 line["cleaned_code"] = cleaned_code
-                code_subtokens = tokenizer.tokenize(cleaned_code)
-                line["code_subtokens"] = code_subtokens
+                cleaned_code_subtokens = tokenizer.tokenize(cleaned_code)
+                line["cleaned_code_subtokens"] = cleaned_code_subtokens
 
-                code_noindent = remove_spaces_and_tabs(cleaned_code)
-                line["code_noindent"] = code_noindent
-                line["code_noindent_subtokens"] = tokenizer.tokenize(code_noindent)
+                if len(cleaned_code_subtokens) >= 510:
+                    continue
 
-                flattened_code = flatten_code(code_noindent)
+                tree = AParser.parse(text=line["cleaned_code"], lang=lang)
+                line["cleaned_code_render"] = str(tree)
+
+                noindent_code = remove_spaces_and_tabs(cleaned_code)
+                line["noindent_code"] = noindent_code
+                line["noindent_code_subtokens"] = tokenizer.tokenize(noindent_code)
+
+                flattened_code = flatten_code(noindent_code)
                 line["flattened_code"] = flattened_code
                 line["flattened_code_subtokens"] = tokenizer.tokenize(flattened_code)
 
-                if len(code_subtokens) <= 510:
-                    extracted_jsonl.append(line)
+                cleaned_code = line["cleaned_code"]
+                line["cleaned_code_char_size"] = len(cleaned_code)
+                line["cleaned_code_line_size"] = len(cleaned_code.split("\n"))
+                line["cleaned_code_tree_size"] = tree_size(tree)
+
+                traverser = ATraverser()
+                res = traverser.preorderTraverse(tree)
+                line["cleaned_code_ast_node_types"] = list(set(res.preNodeTypes))
+
+                noindent_code = line["noindent_code"]
+                line["noindent_code_char_size"] = len(noindent_code)
+                line["noindent_code_line_size"] = len(noindent_code.split("\n"))
+
+                flattened_code = line["flattened_code"]
+                line["flattened_code_char_size"] = len(flattened_code)
+
+                extracted_jsonl.append(line)
 
             logging.info(f"New jsonl : {len(extracted_jsonl)}")
 
