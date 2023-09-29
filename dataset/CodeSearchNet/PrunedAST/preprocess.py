@@ -6,12 +6,11 @@ import logging
 import argparse
 import pandas as pd
 from os import path
-from glob import glob
 from tqdm import tqdm
 
 from transformers import AutoTokenizer
 
-from astars import AParser,AParseTree, ATraverser, APruner
+from astars import AParser, ATraverser
 
 from utils import get_jsonl_paths, remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code, tree_size
 
