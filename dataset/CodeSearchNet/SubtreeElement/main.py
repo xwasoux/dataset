@@ -18,6 +18,30 @@ logging.basicConfig(format='%(asctime)s -\n %(message)s',
 
     
 def main() -> None:
+    '''This code create Subtree-Elements dataset.
+
+    Args: 
+        None
+        
+    Returns: 
+        None
+        
+    Note: 
+        Here is a Dataset structure.
+        
+        {
+            ## Default Data
+
+            "repo" ~ "flattened_code_char_size", 
+
+            ## Appended Data
+
+            "cleaned_code_subtree_elements":        selected subtree elements of node in AST, 
+            "cleaned_code_subtree_elements_unique": unique subtree elements from "cleaned_code_subtree_elements"
+        }
+
+    '''
+    
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--lang", type=str)
