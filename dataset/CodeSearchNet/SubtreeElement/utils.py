@@ -1,6 +1,13 @@
 import re
 from io import StringIO
 import  tokenize
+from glob import glob
+
+from astars import ANode, AParseTree, ATraverser
+
+def get_jsonl_paths(base_dir:str) -> list:
+    condition = f'{base_dir}/*.jsonl'
+    return glob(condition, recursive=True)
 
 def remove_comments_and_docstrings(source:str, lang:str) -> str:
     if lang in ["python"]:
@@ -69,3 +76,17 @@ def remove_spaces_and_tabs(source:str) -> str:
 def flatten_code(source:str) -> str:
     source = re.sub(r"\n", " ", source)
     return source
+
+def tree_size(tree:AParseTree) -> int:
+    return len(tree.root.descendants)+1
+    
+def distance_to_cosine(distance:int) -> float:
+    return 1/(1+distance)
+
+def get_subtree_elements(tree:AParseTree, target_units:list) -> list:
+
+    traverser = ATraverser()
+    res = traverser.preorderTraverse(tree)
+    subtree_elem = [node for node in res.preNodeTypes if node in target_units]
+
+    return subtree_elem
