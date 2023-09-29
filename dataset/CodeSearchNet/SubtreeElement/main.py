@@ -12,7 +12,7 @@ from glob import glob
 from tqdm import tqdm
 from copy import deepcopy
 
-from astars import ANode, AParser, AstAnalyser, AstOperator, ACodeGenerator, AllNodeTraverser, ANamedTraverser, ATypeTraverser
+from astars import ANode, AParser
 from transformers import AutoTokenizer
 
 from utils import *
@@ -56,7 +56,7 @@ def main() -> None:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
             for line in tqdm(jsonl):
-                code = remove_comments_and_docstrings(line["original_string"])
+                code = remove_comments_and_docstrings(line["original_string"], lang)
                 line["code_pure"] = code
                 
                 parser = AParser()
