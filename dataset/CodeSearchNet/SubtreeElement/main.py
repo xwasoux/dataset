@@ -15,7 +15,7 @@ from copy import deepcopy
 from astars import ANode, AParser
 from transformers import AutoTokenizer
 
-from utils import *
+from utils import get_jsonl_paths, remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code, tree_size, distance_to_cosine, get_subtree_elements
 
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
@@ -56,14 +56,11 @@ def main() -> None:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
             for line in tqdm(jsonl):
-                code = remove_comments_and_docstrings(line["original_string"], lang)
-                line["code_pure"] = code
-                
-                parser = AParser()
-                tree = parser.parse(code, lang)
+                tree = AParser.parse(text=line["cleaned_code"], lang=lang)
 
-                line["subtree_elements"] = get_subtree_elements(tree, args.target_subtree_root)
-                line["subtree_elements_unique"] = list(dict.fromkeys(line["subtree_elements"]))
+                cleaned_code_subtree_elements = get_subtree_elements(tree, args.target_subtree_root)
+                line["cleaned_code_subtree_elements"] = cleaned_code_subtree_elements
+                line["cleaned_code_subtree_elements_unique"] = list(set(cleaned_code_subtree_elements))
 
             df = pd.DataFrame(jsonl)
             stored_filename = path.join(args.target_base_dir, lang, f"{partition}.jsonl")
