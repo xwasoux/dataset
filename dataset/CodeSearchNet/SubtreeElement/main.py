@@ -63,8 +63,9 @@ def main() -> None:
                 line["cleaned_code_subtree_elements_unique"] = list(set(cleaned_code_subtree_elements))
 
             df = pd.DataFrame(jsonl)
-            stored_filename = path.join(args.target_base_dir, lang, f"{partition}.jsonl")
-            df.to_json(stored_filename, orient="records", force_ascii=False, lines=True)
+            stored_filename = path.join(args.target_base_dir, lang, partition)
+            df.to_json(f"{stored_filename}.jsonl", orient="records", force_ascii=False, lines=True)
+            df.to_csv(f"{stored_filename}.csv")
 
     return None
 
