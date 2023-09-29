@@ -10,3 +10,7 @@ python3 ../main.py \
     --target_base_dir $target_base_dir \
     --upper_data_size 3000 
 
+CURRENT=$(pwd)
+cd ../output
+zip SubtreeElement -r SubtreeElement
+cd $CURRENT
