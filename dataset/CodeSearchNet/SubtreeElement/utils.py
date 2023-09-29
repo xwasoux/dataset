@@ -3,7 +3,7 @@ from io import StringIO
 import  tokenize
 from glob import glob
 
-from astars import ANode, AParseTree, ATypeTraverser
+from astars import ANode, AParseTree, ATraverser
 
 def get_jsonl_paths(base_dir:str) -> list:
     condition = f'{base_dir}/*.jsonl'
@@ -83,9 +83,10 @@ def tree_size(tree:AParseTree) -> int:
 def distance_to_cosine(distance:int) -> float:
     return 1/(1+distance)
 
-def get_subtree_elements(tree:ANode, target_units:list) -> list:
+def get_subtree_elements(tree:AParseTree, target_units:list) -> list:
 
-    traverse_res = ATypeTraverser.leftPreOrder(tree)
-    subtree_elem = [node for node in traverse_res if node in target_units]
+    traverser = ATraverser()
+    res = traverser.preorderTraverse(tree)
+    subtree_elem = [node for node in res.preNodeTypes if node in target_units]
 
     return subtree_elem
