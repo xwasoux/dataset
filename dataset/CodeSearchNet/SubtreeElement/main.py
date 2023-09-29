@@ -28,6 +28,7 @@ def main() -> None:
     parser.add_argument("--target_base_dir", type=str)
 
     parser.add_argument("--pretrained_model", type=str)
+    parser.add_argument("--upper_data_size", type=int)
 
     args = parser.parse_args()
 
@@ -49,7 +50,14 @@ def main() -> None:
             with open(f"{each_partition_path}") as f:
                 jsonl = [json.loads(l) for l in f.readlines()]
             
-            for line in tqdm(jsonl):
+            if args.upper_data_size:
+                UPPER_LIMIT = args.upper_data_size
+            else:
+                UPPER_LIMIT = len(jsonl)
+
+            for num, _ in enumerate(tqdm(range(UPPER_LIMIT))):
+                line = jsonl[num]
+
                 tree = AParser.parse(text=line["cleaned_code"], lang=lang)
 
                 cleaned_code_subtree_elements = get_subtree_elements(tree, args.target_subtree_root)
