@@ -27,7 +27,6 @@ def main() -> None:
     parser.add_argument("--source_base_dir", type=str)
     parser.add_argument("--target_base_dir", type=str)
 
-    parser.add_argument("--pretrained_model", type=str)
     parser.add_argument("--upper_data_size", type=int)
 
     args = parser.parse_args()
