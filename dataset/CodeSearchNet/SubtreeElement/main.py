@@ -1,26 +1,20 @@
 #!/usr/bin/env python
 
-import re
 import os
 import json
 import logging
 import argparse
-import Levenshtein
 import pandas as pd
 from os import path
-from glob import glob
 from tqdm import tqdm
-from copy import deepcopy
 
-from astars import ANode, AParser
-from transformers import AutoTokenizer
+from astars import AParser
 
-from utils import get_jsonl_paths, remove_comments_and_docstrings, remove_spaces_and_tabs, flatten_code, tree_size, distance_to_cosine, get_subtree_elements
+from utils import get_jsonl_paths, get_subtree_elements
 
 logging.basicConfig(format='%(asctime)s -\n %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S',
                     level=logging.INFO)
-
 
     
 def main() -> None:
