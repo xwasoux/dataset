@@ -1,7 +1,7 @@
 CURRENT=$(pwd)
 
 mkdir ../data ../data/workbench ../data/workbench/Extracted
-mkdir ../data/CuttingAST
+mkdir ../data/PrunedAST
 cd ../data/workbench
 gdown 1rd2Tc6oUWBo7JouwexW3ksQ0PaOhUr6h
 unzip Cleaned_CodeSearchNet.zip
